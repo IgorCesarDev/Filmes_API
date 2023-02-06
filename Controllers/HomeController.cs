@@ -22,16 +22,13 @@ namespace FilmesFinal.Controllers
     [Route("[controller]")]
     public class HomeController : ControllerBase
     {
-        private UserManager<CustomIdentityUser> _userManager;
-        private UserDbContext _context;
         private HomeService _homeService;
 
-        public HomeController(UserManager<CustomIdentityUser> userManager, UserDbContext context, HomeService homeService)
+        public HomeController(HomeService homeService)
         {
-            _userManager = userManager;
-            _context = context;
             _homeService = homeService;
         }
+
         [HttpGet]
         [Authorize(Roles = "regular")]
         public IActionResult RecuperaFilmes()
@@ -42,6 +39,7 @@ namespace FilmesFinal.Controllers
             if(filmesDto == null) { return NotFound(); }
             return Ok(filmesDto.Take(15));
         }
+
         [HttpPost("{id}")]
         [Authorize(Roles = "regular")]
         public IActionResult AdicinaFilmeFavorito(int id)
@@ -51,6 +49,7 @@ namespace FilmesFinal.Controllers
             if (filmeDto == null) { return NotFound(); }
             return Ok(filmeDto);
         }
+
         [HttpGet]
         [Route("filmes-favoritos")]
         [Authorize(Roles = "regular")]
@@ -61,6 +60,7 @@ namespace FilmesFinal.Controllers
             List<ReadFilmeDto> filmesDto = _homeService.RecuperaFilmesPorUsuario(intUserId);
             return Ok(filmesDto);
         }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "regular")]
         public IActionResult DeletaFilmeDeUsuario(int id)
@@ -70,6 +70,7 @@ namespace FilmesFinal.Controllers
             if (resultado.IsFailed) return NotFound();
             return NoContent();
         }
+
         [HttpGet]
         [Route("recomendacoes")]
         [Authorize(Roles = "regular")]

@@ -14,6 +14,7 @@ namespace FilmesFinal.Controllers
         {
             _loginService = loginService;
         }
+
         [HttpPost]
         public IActionResult LogaUsuario(LoginRequest request)
         {
@@ -21,6 +22,7 @@ namespace FilmesFinal.Controllers
             if (resultado.IsFailed) return Unauthorized(resultado.Reasons);
             return Ok(resultado.Reasons);
         }
+
         [HttpPost("/solicita-reset")]
         public IActionResult SoliticaResetSenhaUsuario(SolicitaResetRequest request)
         {
@@ -28,6 +30,7 @@ namespace FilmesFinal.Controllers
             if (resultado.IsFailed) return Unauthorized(resultado.Reasons);
             return Ok(resultado.Reasons);
         }
+
         [HttpPost("/efetua-reset")]
         public IActionResult ResetaSenhaUsuario(EfetuaResetRequest request)
         {

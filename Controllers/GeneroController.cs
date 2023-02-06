@@ -20,6 +20,7 @@ namespace FilmesFinal.Controllers
         {
             _generoService = generoService;
         }
+
         [HttpPost]
         [Authorize(Roles = "admin")]
         public IActionResult AdicionaGenero([FromBody] CreateGeneroDto generoDto)
@@ -27,14 +28,15 @@ namespace FilmesFinal.Controllers
             ReadGeneroDto dto = _generoService.AdicionaGenero(generoDto);
             return CreatedAtAction(nameof(RecuperaGenerosPorId), new { Id = dto.Id }, dto);
         }
+
         [HttpGet]
         public IActionResult RecuperaGeneros() 
         {
             List<ReadGeneroDto> generos = _generoService.RecuperaGeneros();
             if(generos == null) return NotFound();
             return Ok(generos);
-            
         }
+
         [HttpGet("{id}")]
         public IActionResult RecuperaGenerosPorId(int id) 
         {
@@ -42,6 +44,7 @@ namespace FilmesFinal.Controllers
             if (generodto == null) return NotFound();
             return Ok(generodto);
         }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
         public IActionResult AtualizaGeneros(int id, [FromBody] UpdateGeneroDto generoDto)
@@ -50,6 +53,7 @@ namespace FilmesFinal.Controllers
             if (resultado.IsFailed) return NotFound();
             return Ok(resultado);
         }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public IActionResult DeletaFilme(int id)

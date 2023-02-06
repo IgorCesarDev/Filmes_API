@@ -18,11 +18,11 @@ namespace FilmesFinal.Controllers
     {
         private FilmeService _filmeService;
 
-
         public FilmeController(FilmeService filmeService)
         {
            _filmeService = filmeService;
         }
+
         [HttpPost]
         [Authorize(Roles = "admin")]
         public IActionResult AdicionaFilme([FromBody] CreateFilmeDto filmeDto)
@@ -30,6 +30,7 @@ namespace FilmesFinal.Controllers
             ReadFilmeDto dto = _filmeService.AdicionaFilme(filmeDto);
             return CreatedAtAction(nameof(RecuperaFilmesPorId), new {Id = dto.Id}, dto);
         }
+
         [HttpGet]
         public IActionResult RecuperaFilmes([FromQuery] int skip = 0, [FromQuery] int take = 15, [FromQuery]bool genero=true) 
         {
@@ -37,6 +38,7 @@ namespace FilmesFinal.Controllers
             if (filmesDto == null) return NotFound();
             return Ok(filmesDto);
         }
+
         [HttpGet("{id}")]
         public IActionResult RecuperaFilmesPorId(int id)
         {
@@ -44,6 +46,7 @@ namespace FilmesFinal.Controllers
             if (filmeDto == null) { return NotFound(); }
             return Ok(filmeDto);
         }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
         public IActionResult AtualizaFilme(int id, [FromBody] UpdateFilmeDto filmeDto)
@@ -52,6 +55,7 @@ namespace FilmesFinal.Controllers
             if (resultado.IsFailed) return NotFound();
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public IActionResult DeletaFilme(int id) 

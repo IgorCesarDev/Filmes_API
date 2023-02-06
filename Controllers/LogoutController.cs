@@ -14,6 +14,7 @@ namespace FilmesFinal.Controllers
         {
             _logoutService = logoutService;
         }
+
         [HttpPost]
         public IActionResult DeslogaUsuario()
         {
