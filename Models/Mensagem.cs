@@ -15,7 +15,6 @@ namespace FilmesFinal.Models
             Destinatario.AddRange(destinatario.Select(d => new MailboxAddress(d)));
                 Assunto = assunto;
                 Conteudo = $"https://localhost:5001/ativa?UsuarioId={usuarioId}&CodigoDeAtivacao={codigo}";
-
         }
     }
 }

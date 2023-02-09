@@ -14,7 +14,6 @@ namespace FilmesFinal.Services
         {
             _configuration = configuration;
         }
-
         public void EnviarEmail(string[] destinatario, string assunto, int usuarioId, string code)
         {
             Mensagem mensagem = new Mensagem(destinatario, assunto, usuarioId, code);
@@ -46,7 +45,6 @@ namespace FilmesFinal.Services
                 }
             }
         }
-
         private MimeMessage CriaCorpoDoEmail(Mensagem mensagem)
         {
             var mensagemDeEmail = new MimeMessage();

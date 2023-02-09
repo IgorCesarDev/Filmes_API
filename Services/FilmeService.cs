@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
+using System.Reflection.Metadata;
+using System;
+using System.Threading.Tasks;
 
 namespace FilmesFinal.Services
 {
@@ -14,61 +18,82 @@ namespace FilmesFinal.Services
     {
         private UserDbContext _context;
         private IMapper _mapper;
-
-        public FilmeService(UserDbContext context, IMapper mapper) 
+        private IMemoryCache _memoryCache;
+        private const string FILMES_KEY = "Filmes";
+        MemoryCacheEntryOptions memoryCachEntryOptions = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(3600),
+            SlidingExpiration = TimeSpan.FromSeconds(1200)
+        };
+        public FilmeService(UserDbContext context, IMapper mapper, IMemoryCache memoryCache)
         {
             _context = context;
             _mapper = mapper;
+            _memoryCache = memoryCache;
         }
-        public ReadFilmeDto AdicionaFilme(CreateFilmeDto filmeDto)
+        public async Task<ReadFilmeDto> AdicionaFilme(CreateFilmeDto filmeDto)
         {
             Filme filme = _mapper.Map<Filme>(filmeDto);
             _context.Filmes.Add(filme);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return _mapper.Map<ReadFilmeDto>(filme);
         }
-        public List<ReadFilmeDto> RecuperaFilmes(int skip, int take, bool genero)
+        public async Task<List<ReadFilmeDto>> RecuperaFilmesAsync(int skip, int take)
         {
-            List<Filme> filmes;
-            if (genero) { filmes = _context.Filmes.Include(p => p.Generos).Skip(skip).Take(take).ToList(); }
-            else
+            if (_memoryCache.TryGetValue(FILMES_KEY, out List<Filme> filmes))
             {
-                 filmes = _context.Filmes.Skip(skip).Take(take).ToList();
+                List<ReadFilmeDto> filmesDto = _mapper.Map<List<ReadFilmeDto>>(filmes);
+                return filmesDto;
             }
-            if(filmes != null)
+            filmes = await _context.Filmes.Include(f => f.Generos).Skip(skip).Take(take).ToListAsync();
+            if (filmes != null)
             {
+                _memoryCache.Set(FILMES_KEY, filmes, memoryCachEntryOptions);
                 List<ReadFilmeDto> filmesDto = _mapper.Map<List<ReadFilmeDto>>(filmes);
                 return filmesDto;
             }
             return null;
         }
-        public ReadFilmeDto RecuperaFilmesPorId(int id)
+        public async Task<ReadFilmeDto> RecuperaFilmesPorIdAsync(int id)
         {
-            Filme filme = _context.Filmes.Include(p => p.Generos).FirstOrDefault(p => p.Id == id);
+            if (_memoryCache.TryGetValue(FILMES_KEY, out List<Filme> filmes))
+            {
+                var filmeSelecionado = filmes.FirstOrDefault(f => f.Id == id);
+                ReadFilmeDto filmeSelecionadoDto = _mapper.Map<ReadFilmeDto>(filmeSelecionado);
+                return filmeSelecionadoDto;
+            }
+            Filme filme = await _context.Filmes.Include(p => p.Generos).FirstOrDefaultAsync(p => p.Id == id);
             if (filme != null)
-            { 
-                ReadFilmeDto filmeDto = _mapper.Map<ReadFilmeDto>(filme); 
+            {
+                ReadFilmeDto filmeDto = _mapper.Map<ReadFilmeDto>(filme);
                 return filmeDto;
             }
             return null;
         }
-        public Result AtualizaFilme(int id, UpdateFilmeDto filmeDto)
+        public async Task<Result> AtualizaFilme(int id, UpdateFilmeDto filmeDto)
         {
-            Filme filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
-            if (filme == null)
-            {
-                return Result.Fail("Erro, Filme não encontrado");
-            }
+            Filme filme = await _context.Filmes.FirstOrDefaultAsync(filme => filme.Id == id);
+            if (filme == null) {return Result.Fail("Erro, Filme não encontrado");}
             _mapper.Map(filmeDto, filme);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            if (_memoryCache.TryGetValue(FILMES_KEY, out List<Filme> filmes))
+            {
+               _memoryCache.Remove(FILMES_KEY);
+               _memoryCache.Set(FILMES_KEY, filmes, memoryCachEntryOptions);
+            }
             return Result.Ok();
         }
-        public Result DeletaFilme(int id)
+        public async Task<Result> DeletaFilme(int id)
         {
-            Filme filme = _context.Filmes.FirstOrDefault(f => f.Id == id);
-            if(filme == null) { return Result.Fail("Erro, Filme não encontrado"); }
+            Filme filme =  await _context.Filmes.FirstOrDefaultAsync(f => f.Id == id);
+            if (filme == null) { return Result.Fail("Erro, Filme não encontrado"); }
             _context.Filmes.Remove(filme);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            if (_memoryCache.TryGetValue(FILMES_KEY, out List<Filme> filmes))
+            {
+                filmes.Remove(filme);
+                _memoryCache.Set(FILMES_KEY, filmes, memoryCachEntryOptions);
+            }
             return Result.Ok();
         }
     }

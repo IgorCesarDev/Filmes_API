@@ -31,13 +31,13 @@ namespace FilmesFinal.Controllers
 
         [HttpGet]
         [Authorize(Roles = "regular")]
-        public IActionResult RecuperaFilmes()
+        public IActionResult RecuperaFilmesParaVer()
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             int intUserId = int.Parse(usuarioId);
-            List<ReadFilmeDto> filmesDto = _homeService.RecuperaFilmes(intUserId);
+            var filmesDto = _homeService.RecuperaFilmesParaVer(intUserId);
             if(filmesDto == null) { return NotFound(); }
-            return Ok(filmesDto.Take(15));
+            return Ok(filmesDto);
         }
 
         [HttpPost("{id}")]
@@ -45,7 +45,7 @@ namespace FilmesFinal.Controllers
         public IActionResult AdicinaFilmeFavorito(int id)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            ReadFilmeDto filmeDto = _homeService.AdicinaFilmeFavorito(id, usuarioId);
+            var filmeDto = _homeService.AdicinaFilmeFavorito(id, usuarioId);
             if (filmeDto == null) { return NotFound(); }
             return Ok(filmeDto);
         }
@@ -57,17 +57,17 @@ namespace FilmesFinal.Controllers
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             int intUserId = int.Parse(usuarioId);
-            List<ReadFilmeDto> filmesDto = _homeService.RecuperaFilmesPorUsuario(intUserId);
+            var filmesDto = _homeService.RecuperaFilmesFavoritos(intUserId);
             return Ok(filmesDto);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "regular")]
-        public IActionResult DeletaFilmeDeUsuario(int id)
+        public IActionResult DeletaFilmeFavorito(int id)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Result resultado = _homeService.DeletaFilmeDeUsuario(id, usuarioId);
-            if (resultado.IsFailed) return NotFound();
+            var resultado = _homeService.DeletaFilmeFavorito(id, usuarioId);
+            if (resultado.IsFaulted) return NotFound();
             return NoContent();
         }
 
@@ -77,10 +77,8 @@ namespace FilmesFinal.Controllers
         public IActionResult RecomendacoesFilmesPorIdade()
         {
             var nascimentoUsuario = User.FindFirst(ClaimTypes.DateOfBirth).Value;
-            List<ReadFilmeDto> filmesDto = _homeService.RecomendacoesFilmesPorIdade(nascimentoUsuario);
-            return Ok(filmesDto.Take(10));
+           var filmesDto = _homeService.RecomendacoesFilmesPorIdade(nascimentoUsuario);
+            return Ok(filmesDto);
         }
-
-
     }
 }

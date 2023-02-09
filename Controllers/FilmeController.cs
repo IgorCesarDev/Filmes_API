@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FilmesFinal.Controllers
 {
@@ -27,14 +28,14 @@ namespace FilmesFinal.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult AdicionaFilme([FromBody] CreateFilmeDto filmeDto)
         {
-            ReadFilmeDto dto = _filmeService.AdicionaFilme(filmeDto);
-            return CreatedAtAction(nameof(RecuperaFilmesPorId), new {Id = dto.Id}, dto);
+            var dto = _filmeService.AdicionaFilme(filmeDto);
+            return CreatedAtAction(nameof(RecuperaFilmesPorId), new { Id = dto.Id }, dto);
         }
 
         [HttpGet]
-        public IActionResult RecuperaFilmes([FromQuery] int skip = 0, [FromQuery] int take = 15, [FromQuery]bool genero=true) 
+        public IActionResult RecuperaFilmes([FromQuery] int skip = 0, [FromQuery] int take = 15)
         {
-            List<ReadFilmeDto> filmesDto = _filmeService.RecuperaFilmes(skip, take, genero);
+            var filmesDto = _filmeService.RecuperaFilmesAsync(skip, take);
             if (filmesDto == null) return NotFound();
             return Ok(filmesDto);
         }
@@ -42,7 +43,7 @@ namespace FilmesFinal.Controllers
         [HttpGet("{id}")]
         public IActionResult RecuperaFilmesPorId(int id)
         {
-            ReadFilmeDto filmeDto = _filmeService.RecuperaFilmesPorId(id);
+            var filmeDto = _filmeService.RecuperaFilmesPorIdAsync(id);
             if (filmeDto == null) { return NotFound(); }
             return Ok(filmeDto);
         }
@@ -51,19 +52,18 @@ namespace FilmesFinal.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult AtualizaFilme(int id, [FromBody] UpdateFilmeDto filmeDto)
         {
-            Result resultado = _filmeService.AtualizaFilme(id, filmeDto);
-            if (resultado.IsFailed) return NotFound();
+            var resultado = _filmeService.AtualizaFilme(id, filmeDto);
+            if (resultado.IsFaulted) return NotFound();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
-        public IActionResult DeletaFilme(int id) 
+        public IActionResult DeletaFilme(int id)
         {
-            Result resultado = _filmeService.DeletaFilme(id);
-            if (resultado.IsFailed) return NotFound();
+            var resultado = _filmeService.DeletaFilme(id);
+            if (resultado.IsFaulted) return NotFound();
             return NoContent();
-
         }
     }
 }

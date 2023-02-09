@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace FilmesFinal.Controllers
 {
@@ -25,22 +26,22 @@ namespace FilmesFinal.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult AdicionaGenero([FromBody] CreateGeneroDto generoDto)
         {
-            ReadGeneroDto dto = _generoService.AdicionaGenero(generoDto);
-            return CreatedAtAction(nameof(RecuperaGenerosPorId), new { Id = dto.Id }, dto);
+            var genero = _generoService.AdicionaGenero(generoDto);
+            return CreatedAtAction(nameof(RecuperaGenerosPorId), new { Id = genero.Id }, genero);
         }
 
         [HttpGet]
-        public IActionResult RecuperaGeneros() 
+        public IActionResult RecuperaGeneros()
         {
-            List<ReadGeneroDto> generos = _generoService.RecuperaGeneros();
-            if(generos == null) return NotFound();
+            var generos = _generoService.RecuperaGeneros();
+            if (generos == null) return NotFound();
             return Ok(generos);
         }
 
         [HttpGet("{id}")]
         public IActionResult RecuperaGenerosPorId(int id) 
         {
-            ReadGeneroDto generodto = _generoService.RecuperaGenerosPorId(id);
+            var generodto = _generoService.RecuperaGenerosPorId(id);
             if (generodto == null) return NotFound();
             return Ok(generodto);
         }
@@ -49,8 +50,8 @@ namespace FilmesFinal.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult AtualizaGeneros(int id, [FromBody] UpdateGeneroDto generoDto)
         {
-            Result resultado = _generoService.AtualizaGeneros(id, generoDto);
-            if (resultado.IsFailed) return NotFound();
+            var resultado = _generoService.AtualizaGeneros(id, generoDto);
+            if (resultado.IsFaulted) return NotFound();
             return Ok(resultado);
         }
 
@@ -58,12 +59,9 @@ namespace FilmesFinal.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult DeletaFilme(int id)
         {
-            Result resultado = _generoService.DeletaGenero(id);
-            if (resultado.IsFailed) return NotFound();
+            var resultado = _generoService.DeletaGenero(id);
+            if (resultado.IsFaulted) return NotFound();
             return Ok(resultado);
         }
-
-
-
     }
 }
