@@ -45,10 +45,7 @@ namespace FilmesFinal.Services
                 List<ReadFilmeDto> filmesFavoriosDto = _mapper.Map<List<ReadFilmeDto>>(filmesFavorios);
                 return filmesFavoriosDto;
             }
-            CustomIdentityUser usuario = await _context.Users
-                     .Include(f => f.FilmesFavoritos)
-                        .ThenInclude(g => g.Generos)
-                            .FirstOrDefaultAsync(i => i.Id == userId);
+            CustomIdentityUser usuario = await RecuperaUsuario(userId);
             filmesFavorios = usuario.FilmesFavoritos.ToList();
             if(filmesFavorios != null) 
             {
@@ -101,19 +98,24 @@ namespace FilmesFinal.Services
 
         public async Task<List<ReadFilmeDto>> RecuperaFilmesSemFavoritos(int userId)
         {
-            CustomIdentityUser usuarioOk = await RecuperaUsuario(userId);
-            List<Filme> filmesFavoritos = usuarioOk.FilmesFavoritos.ToList();
+            if(_memoryCache.TryGetValue(HOME_KEY, out List<Filme> filmesCache))
+            {
+                List<ReadFilmeDto> filmesDtoCache = _mapper.Map<List<ReadFilmeDto>>(filmesCache.Take(15));
+                return filmesDtoCache;
+            }
+            CustomIdentityUser usuario = await RecuperaUsuario(userId);
+            List<Filme> filmesFavoritos = usuario.FilmesFavoritos.ToList();
             List<Filme> filmes = await _context.Filmes.Include(g => g.Generos).ToListAsync();
             List<Filme> filmeEnd = filmes.Where(e => !filmesFavoritos.Any(f => f.Id == e.Id)).ToList();
 
             if (filmeEnd != null)
             {
+                _memoryCache.Set(HOME_KEY, filmeEnd, memoryCachEntryOptions);
                 List<ReadFilmeDto> filmesDto = _mapper.Map<List<ReadFilmeDto>>(filmeEnd.Take(15));
                 return filmesDto;
             }
             return null;
         }
-
         private async Task<CustomIdentityUser> RecuperaUsuario(int userId)
         {
             return await _context.Users
@@ -121,7 +123,6 @@ namespace FilmesFinal.Services
                                     .ThenInclude(g => g.Generos)
                                         .FirstOrDefaultAsync(i => i.Id == userId);
         }
-
         private static int CalcularIdade(string nascimentoUsuario)
         {
             DateTime dateUser = DateTime.Parse(nascimentoUsuario);
@@ -140,9 +141,8 @@ namespace FilmesFinal.Services
             var updateValue = await _context.Filmes.Include(f => f.Usuarios).Include(f => f.Generos).
                 ToListAsync();
             _memoryCache.Remove(HOMEff_KEY);
-            _memoryCache.Set(HOME_KEY, updateValue, memoryCachEntryOptions);
+            _memoryCache.Set(HOMEff_KEY, updateValue, memoryCachEntryOptions);
         }
     }
-
 }
 

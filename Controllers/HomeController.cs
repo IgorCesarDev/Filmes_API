@@ -31,11 +31,11 @@ namespace FilmesFinal.Controllers
 
         [HttpGet]
         [Authorize(Roles = "regular")]
-        public IActionResult RecuperaFilmesParaVer()
+        public IActionResult RecuperaFilmesSemFavoritos()
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             int intUserId = int.Parse(usuarioId);
-            var filmesDto = _homeService.RecuperaFilmesParaVer(intUserId);
+            var filmesDto = _homeService.RecuperaFilmesSemFavoritos(intUserId);
             if(filmesDto == null) { return NotFound(); }
             return Ok(filmesDto);
         }
