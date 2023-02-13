@@ -1,5 +1,5 @@
-﻿using FilmesFinal.Data.Request;
-using FilmesFinal.Dtos.UsuarioDto;
+﻿using FilmesFinal.Dtos.UsuarioDto;
+using FilmesFinal.Request;
 using FilmesFinal.Services;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;

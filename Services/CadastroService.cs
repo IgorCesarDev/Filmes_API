@@ -4,10 +4,10 @@ using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using FilmesFinal.Data.Request;
 using System;
 using System.Linq;
 using System.Web;
+using FilmesFinal.Request;
 
 namespace FilmesFinal.Services
 {

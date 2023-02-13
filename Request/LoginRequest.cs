@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FilmesFinal.Data.Request
+namespace FilmesFinal.Request
 {
     public class LoginRequest
     {

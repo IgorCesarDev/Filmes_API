@@ -1,5 +1,5 @@
-﻿using FilmesFinal.Data.Request;
-using FilmesFinal.Models;
+﻿using FilmesFinal.Models;
+using FilmesFinal.Request;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using System;
