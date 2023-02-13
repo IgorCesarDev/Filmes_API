@@ -35,7 +35,7 @@ namespace FilmesFinal
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
-            ConexaoComBanco(services);
+            RegistrarContextoDoBancoDeDados(services);
             ConfigureAspNetIdentity(services);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             ConfigureDependenciasServices(services);
@@ -47,8 +47,6 @@ namespace FilmesFinal
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FilmesFinal", Version = "v1" });
             });
         }
-
-        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -78,7 +76,7 @@ namespace FilmesFinal
                  .AddEntityFrameworkStores<UserDbContext>().AddDefaultTokenProviders();
         }
 
-        private void ConexaoComBanco(IServiceCollection services)
+        private void RegistrarContextoDoBancoDeDados(IServiceCollection services)
         {
             services.AddDbContext<UserDbContext>(options => options
                      .UseMySQL(Configuration.GetConnectionString("UsuarioConnection")));
@@ -97,7 +95,8 @@ namespace FilmesFinal
                 token.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0asdjas09djsa09djasdjsadajsd09asjd09sajcnzxn")),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                                                            .GetBytes("0asdjas09djsa09djasdjsadajsd09asjd09sajcnzxn")),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
@@ -107,7 +106,6 @@ namespace FilmesFinal
 
         private static void ConfigureDependenciasServices(IServiceCollection services)
         {
-
             services.AddScoped<FilmeService, FilmeService>();
             services.AddScoped<GeneroService, GeneroService>();
             services.AddScoped<CadastroService, CadastroService>();
@@ -117,6 +115,5 @@ namespace FilmesFinal
             services.AddScoped<EmailService, EmailService>();
             services.AddScoped<HomeService, HomeService>();
         }
-
     }
 }
